@@ -1,0 +1,55 @@
+﻿@page "/call-thecatapi"
+@using System.Text.Json
+@using System.Text.Json.Serialization;
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Call TheCatAPI</PageTitle>
+
+<h1>TheCatAPI Test from a Blazor Server Razor component</h1>
+
+@if (@catImages?.Count() > 0)
+{
+    <div>
+        <img src="@catImages.First().Url" style="height: 480px">
+    </div>
+}
+
+<div style="padding: 15px 0px">
+    <button class="btn btn-primary" @onclick="GetImage">Generate a new image</button>
+</div>
+
+@code {
+    private IEnumerable<CatImage>? catImages = Array.Empty<CatImage>();
+    private bool shouldRender;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private async Task GetImage()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://api.thecatapi.com/v1/images/search");
+        request.Headers.Add("x-api-key", "969ba8d7-da52-4d64-84ed-f9462aee41c6");
+
+        var client = ClientFactory.CreateClient();
+
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            catImages = await JsonSerializer.DeserializeAsync<IEnumerable<CatImage>>(responseStream);
+        }
+
+        shouldRender = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetImage();
+    }
+
+    public class CatImage
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; } = "";
+    }
+}
