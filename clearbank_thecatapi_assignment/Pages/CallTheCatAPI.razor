@@ -27,7 +27,7 @@
     private async Task GetImage()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://api.thecatapi.com/v1/images/search");
-        request.Headers.Add("x-api-key", "969ba8d7-da52-4d64-84ed-f9462aee41c6");
+        request.Headers.Add("x-api-key", "<Place your API key here!>");
 
         var client = ClientFactory.CreateClient();
 
